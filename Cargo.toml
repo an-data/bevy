@@ -47,7 +47,7 @@ exclude = [
 opt-level = 1
 debug = 2
 lto = "thin"
-incremental = true
+#incremental = true
 codegen-units = 16
 
 

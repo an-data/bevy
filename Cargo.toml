@@ -50,6 +50,10 @@ lto = "thin"
 #incremental = true
 codegen-units = 16
 
+# Enable a large amount of optimization in the dev profile for dependencies.
+[profile.dev.package."*"]
+opt-level = 3
+
 
 [workspace.lints.clippy]
 doc_markdown = "warn"
@@ -134,7 +138,7 @@ unsafe_op_in_unsafe_fn = "warn"
 unused_qualifications = "warn"
 
 [features]
-default = ["2d", "3d", "ui","debug"]
+default = ["2d", "3d", "ui"]
 
 # PROFILE: The default 2D Bevy experience. This includes the core Bevy framework, 2D functionality, Bevy UI, scenes, audio, and picking.
 2d = [

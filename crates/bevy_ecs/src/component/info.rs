@@ -361,7 +361,11 @@ impl ComponentDescriptor {
 #[derive(Debug, Default)]
 pub struct Components {
     pub(super) components: Vec<Option<ComponentInfo>>,
+
+    /// 存储了 Component 的 Id
     pub(super) indices: TypeIdMap<ComponentId>,
+
+    /// 存储了  Resource 的 Id
     pub(super) resource_indices: TypeIdMap<ComponentId>,
     // This is kept internal and local to verify that no deadlocks can occor.
     pub(super) queued: bevy_platform::sync::RwLock<QueuedComponents>,

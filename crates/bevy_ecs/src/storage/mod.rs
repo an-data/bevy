@@ -41,7 +41,10 @@ pub struct Storages {
     pub sparse_sets: SparseSets,
     /// Backing storage for [`Table`] components.
     pub tables: Tables,
+
     /// Backing storage for resources.
+    ///
+    /// 存储了 Resources 对象
     pub resources: Resources<true>,
     /// Backing storage for `!Send` resources.
     pub non_send_resources: Resources<false>,

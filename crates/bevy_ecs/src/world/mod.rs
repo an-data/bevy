@@ -104,7 +104,7 @@ pub struct World {
 
     /// 作用：管理组件类型与存储的映射关系。
     ///
-    /// 细节：Bevy 中每种组件类型（如 Position、Velocity）都有唯一的 ComponentId，
+    /// 细节：Bevy 中每种组件类型（如 Position、Velocity、Resource）都有唯一的 ComponentId，
     ///
     /// components 存储了 ComponentId 到组件存储（ComponentStorage）的映射，确保能通过组件类型快速找到其数据存储位置。
     pub(crate) components: Components,

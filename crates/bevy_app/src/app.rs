@@ -647,6 +647,7 @@ impl App {
     /// Panics if one of the plugins had already been added to the application.
     ///
     /// [`PluginGroup`]:super::PluginGroup
+    ///添加插件之后 会调用  Plugin::build() 直接将 system resource 等资源插入 App
     #[track_caller]
     pub fn add_plugins<M>(&mut self, plugins: impl Plugins<M>) -> &mut Self {
         if matches!(
@@ -657,6 +658,7 @@ impl App {
                 "Plugins cannot be added after App::cleanup() or App::finish() has been called."
             );
         }
+
         plugins.add_to_app(self);
         self
     }

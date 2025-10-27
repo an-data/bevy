@@ -90,19 +90,88 @@ use unsafe_world_cell::{UnsafeEntityCell, UnsafeWorldCell};
 /// There are also *non send resources*, which can only be accessed on the main thread.
 /// See [`Resource`] for usage.
 pub struct World {
+    ///作用：World 实例的唯一标识符。
+    ///
+    /// 用途：在多世界场景（如 Bevy 支持多个独立 World）中区分不同的游戏世界，避免混淆。
     id: WorldId,
+
+    ///作用：管理所有实体（Entity） 的生命周期（创建、销毁、标记等）。
+    ///
+    /// 内部逻辑：存储实体的 ID、是否活跃（未被销毁）、以及实体对应的原型（Archetype） 索引（用于快速定位组件数据）。
+    ///
+    ///示例：当你调用 commands.spawn() 创建实体时，entities 会分配一个新的 Entity ID 并记录其状态。
     pub(crate) entities: Entities,
+
+    /// 作用：管理组件类型与存储的映射关系。
+    ///
+    /// 细节：Bevy 中每种组件类型（如 Position、Velocity）都有唯一的 ComponentId，
+    ///
+    /// components 存储了 ComponentId 到组件存储（ComponentStorage）的映射，确保能通过组件类型快速找到其数据存储位置。
     pub(crate) components: Components,
+
+    /// 作用：为组件类型分配唯一的 ComponentId，并维护类型与 ID 的双向映射。
+    ///
+    /// 功能：当你注册一个新组件类型（如 app.register_component::<MyComponent>()），
+    ///
+    /// component_ids 会为其分配一个全局唯一的 ComponentId，方便后续通过类型查询 ID 或通过 ID 反查类型。
     pub(crate) component_ids: ComponentIds,
+    /// 作用：管理原型（Archetype） 集合。
+    ///
+    /// 原型的含义：原型是 “具有相同组件组合的实体” 的分组（例如，所有包含 Position + Velocity 组件的实体属于同一原型）。
+    ///
+    /// 内部逻辑：每个原型存储了该组实体的组件数据（以紧凑数组形式），以及实体列表。通过原型，Bevy 能高效地批量查询和更新具有相同组件的实体。
     pub(crate) archetypes: Archetypes,
+    ///作用：存储资源（Resource） 数据。
+    ///
+    /// 细节：资源是全局唯一的数据（如 Score、Time），
+    ///
+    /// storages 以键值对形式存储资源（键为资源类型的 TypeId，值为资源实例），支持快速插入、查询和修改。
     pub(crate) storages: Storages,
+
+    /// 作用：管理组件包（Bundle） 的元数据。
+    ///
+    /// 组件包：多个组件的组合（如 SpriteBundle 包含 Sprite、Transform、GlobalTransform 等），
+    ///
+    /// bundles 存储了每个 Bundle 类型包含的组件类型列表，方便快速为实体添加一组组件。
     pub(crate) bundles: Bundles,
+
+    /// 作用：管理观察者（Observer），用于监听实体 / 组件的变化（如实体创建、组件添加 / 移除）。
+    ///
+    /// 用途：当特定事件发生时（如某个实体添加了 Health 组件），观察者会触发预定义的回调函数，常用于实现事件驱动逻辑。
     pub(crate) observers: Observers,
+
+    ///作用：记录被移除的组件信息，用于系统查询 “最近被移除的组件”。
+    ///
+    /// 机制：当组件从实体中移除时，其信息会暂存到这里，
+    ///
+    /// 系统可通过 Query<RemovedComponents<T>> 获取最近一帧被移除的 T 组件，方便处理清理逻辑（如实体死亡后移除碰撞体）。
     pub(crate) removed_components: RemovedComponentMessages,
+
+    ///作用：跟踪组件 / 资源的修改时间戳，用于实现 “变化检测”。
+    ///
+    /// 细节：change_tick 是一个原子计数器，每次 组件 / 资源 被修改时递增；
+    ///
+    /// last_change_tick 记录当前世界的最新修改 tick。
+    ///
+    /// 系统可通过 Changed<T> 过滤出 “自上次查询后被修改过的组件”，优化更新逻辑（只处理变化的数据）。
     pub(crate) change_tick: AtomicU32,
+
+    ///作用：记录上次检查变化的时间戳，配合 change_tick 实现变化检测。
+    ///
+    /// 例如：系统执行时会将 last_check_tick 更新为当前 change_tick，下次执行时通过对比即可知道哪些组件在两次执行之间被修改过。
     pub(crate) last_change_tick: Tick,
+
+    ///作用：记录上次检查变化的时间戳，配合 change_tick 实现变化检测。
+    ///
+    /// 例如：系统执行时会将 last_check_tick 更新为当前 change_tick，下次执行时通过对比即可知道哪些组件在两次执行之间被修改过。
     pub(crate) last_check_tick: Tick,
+
+    ///作用：管理触发器（Trigger） 的 ID 生成，用于观察者或事件触发的唯一标识。
     pub(crate) last_trigger_id: u32,
+
+    ///作用：存储延迟执行的命令（如 commands.spawn()、entity.despawn() 等）。
+    ///
+    /// 机制：命令不会立即执行，而是先加入队列，在系统执行完毕后统一处理，避免在系统运行时修改 World 导致的迭代器失效或数据竞争。
     pub(crate) command_queue: RawCommandQueue,
 }
 

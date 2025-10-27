@@ -42,6 +42,15 @@ exclude = [
   "tests-integration",
 ]
 
+#debug 调试代码时的配置
+[profile.dev]
+opt-level = 1
+debug = 2
+lto = "thin"
+incremental = true
+codegen-units = 16
+
+
 [workspace.lints.clippy]
 doc_markdown = "warn"
 manual_let_else = "warn"

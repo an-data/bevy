@@ -140,6 +140,8 @@ pub struct Swap<Clear>(PhantomData<Clear>);
 ///     }
 /// }
 /// ```
+///
+/// 调试专用基本图形组件
 pub struct Gizmos<'w, 's, Config = DefaultGizmoConfigGroup, Clear = ()>
 where
     Config: GizmoConfigGroup,
